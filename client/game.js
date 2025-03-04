@@ -3,7 +3,7 @@ const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
 const gridSize = 20; // Size of the grid
-const canvasSize = 700; // Size of the canvas
+const canvasSize = 500; // Size of the canvas
 const snakeSpeed = 100; // Speed of the snake (in milliseconds)
 
 canvasExpand = 400;
