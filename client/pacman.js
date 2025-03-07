@@ -13,4 +13,4 @@ document.addEventListener("DOMContentLoaded", () => {
         size: 20,
         color: "yellow",
         speed: 5
-    };
+    });

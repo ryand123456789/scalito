@@ -114,10 +114,32 @@ function changeDirection(event) {
             }
             break;
     }
+
+    const gamepads = navigator.getGamepads();
+            const gamepad = gamepads[0];
+            var xAxis = gamepad.axes[0];
+            var yAxis = gamepad.axes[1];
+        if (xAxis > 0)
+        {
+            direction = { x: gridSize, y: 0 };
+        }
+        if (xAxis < 0)
+        {
+            direction = { x: -gridSize, y: 0 };
+        }
+        if (yAxis > 0)
+        {
+            direction = { x: 0, y: -gridSize };
+        }
+        if (yAxis < 0)
+        {
+            direction = { x: 0, y: gridSize };
+        }
+            
 }
 
 // Event listener for arrow key press to change direction
 document.addEventListener("keydown", changeDirection);
 
 // Start the game loop
-gameLoop();
+gameLoop(); 
