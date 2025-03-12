@@ -1,19 +1,21 @@
 // Game variables
 const canvas = document.getElementById("gameCanvas");
+const message = document.getElementById("message")
 const ctx = canvas.getContext("2d");
 
 const gridSize = 20; // Size of the grid
 const canvasSize = 500; // Size of the canvas
 const snakeSpeed = 100; // Speed of the snake (in milliseconds)
+var canvasExpand = 400;
 
-canvasExpand = 400;
+document.addEventListener("DOMContentLoaded", () => {
 
 canvas.width = canvasSize+canvasExpand;
 canvas.height = canvasSize;
 
 
 let snake = [{ x: 160, y: 160 }];
-let direction = { x: gridSize, y: 0 }; // Moving to the right initially
+let direction = { x: 0, y: 0 }; // Moving to the right initially
 let food = generateFood();
 let gameOver = false;
 
@@ -21,6 +23,8 @@ let gameOver = false;
 function gameLoop() {
     if (gameOver) {
         return alert("Game Over! Press OK to restart.");
+        
+        gamepad.buttons[8].pressed //this is for the reset func.
     }
 
     setTimeout(() => {
@@ -31,6 +35,7 @@ function gameLoop() {
         drawFood();
         drawFood();
         gameLoop();
+        gamepadRep();
     }, snakeSpeed);
 }
 
@@ -56,7 +61,8 @@ function moveSnake() {
     if (head.x === food.x && head.y === food.y) {
         food = generateFood();
     } else {
-        snake.pop(); // Remove the tail
+        snake.pop();
+ // Remove the tail
     }
 }
 
@@ -114,28 +120,52 @@ function changeDirection(event) {
             }
             break;
     }
-
+            
+}
+let xAxis = 0;
+let yAxis = 0;
+let direcProxy = 5;
+function gamepadRep(){
     const gamepads = navigator.getGamepads();
-            const gamepad = gamepads[0];
-            var xAxis = gamepad.axes[0];
-            var yAxis = gamepad.axes[1];
-        if (xAxis > 0)
+    const gamepad = gamepads[0];
+    if(gamepad){
+        if(!(gamepad.axes[0] < 0.2 && gamepad.axes[0] > -0.2)){
+            xAxis = gamepad.axes[0];
+            console.log("set xAxis");
+        }
+        if(!(gamepad.axes[1] < 0.2 && gamepad.axes[1] > -0.2)){
+            yAxis = gamepad.axes[1];
+            console.log("set yAxis");
+        }
+
+        if (xAxis === 1 && xAxis != -1 && direcProxy != 3)
         {
             direction = { x: gridSize, y: 0 };
+            xAxis = 0;
+            direcProxy = 1;
+
         }
-        if (xAxis < 0)
+        if (xAxis === -1 && xAxis != 1 && direcProxy != 1)
         {
             direction = { x: -gridSize, y: 0 };
+            xAxis = 0;
+            direcProxy = 3;
         }
-        if (yAxis > 0)
+        if (yAxis === -1 && yAxis != 1 && direcProxy!=2)
         {
             direction = { x: 0, y: -gridSize };
+            yAxis = 0;
+            direcProxy = 0;
         }
-        if (yAxis < 0)
+        if (yAxis === 1 && yAxis != -1 && direcProxy!=0)
         {
             direction = { x: 0, y: gridSize };
+            yAxis = 0;
+            direcProxy = 2;
         }
-            
+        console.log("yAxis "+yAxis);
+        console.log("xAxis "+xAxis);
+    }
 }
 
 // Event listener for arrow key press to change direction
@@ -143,3 +173,4 @@ document.addEventListener("keydown", changeDirection);
 
 // Start the game loop
 gameLoop(); 
+})
