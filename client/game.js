@@ -17,14 +17,15 @@ canvas.height = canvasSize;
 let snake = [{ x: 160, y: 160 }];
 let direction = { x: 0, y: 0 }; // Moving to the right initially
 let food = generateFood();
+let food2 = generateFood();
 let gameOver = false;
 
 // Game loop
 function gameLoop() {
     if (gameOver) {
-        return alert("Game Over! Press OK to restart.");
-        
-        gamepad.buttons[8].pressed //this is for the reset func.
+        message.textContent = "Game Over! Press the R button or click Restart to restart the game.";
+        direction = 0;
+         //this is for the reset func.
     }
 
     setTimeout(() => {
@@ -60,6 +61,7 @@ function moveSnake() {
     // Check if the snake eats the food
     if (head.x === food.x && head.y === food.y) {
         food = generateFood();
+        food2 = generateFood();
     } else {
         snake.pop();
  // Remove the tail
@@ -128,6 +130,10 @@ let direcProxy = 5;
 function gamepadRep(){
     const gamepads = navigator.getGamepads();
     const gamepad = gamepads[0];
+    if(gamepad.buttons[8].pressed)
+    {
+        location.reload();
+    }
     if(gamepad){
         if(!(gamepad.axes[0] < 0.2 && gamepad.axes[0] > -0.2)){
             xAxis = gamepad.axes[0];
@@ -137,31 +143,33 @@ function gamepadRep(){
             yAxis = gamepad.axes[1];
             console.log("set yAxis");
         }
+        
+        if(!gameOver){
+            if (xAxis === 1 && xAxis != -1 && direcProxy != 3)
+            {
+                direction = { x: gridSize, y: 0 };
+                xAxis = 0;
+                direcProxy = 1;
 
-        if (xAxis === 1 && xAxis != -1 && direcProxy != 3)
-        {
-            direction = { x: gridSize, y: 0 };
-            xAxis = 0;
-            direcProxy = 1;
-
-        }
-        if (xAxis === -1 && xAxis != 1 && direcProxy != 1)
-        {
-            direction = { x: -gridSize, y: 0 };
-            xAxis = 0;
-            direcProxy = 3;
-        }
-        if (yAxis === -1 && yAxis != 1 && direcProxy!=2)
-        {
-            direction = { x: 0, y: -gridSize };
-            yAxis = 0;
-            direcProxy = 0;
-        }
-        if (yAxis === 1 && yAxis != -1 && direcProxy!=0)
-        {
-            direction = { x: 0, y: gridSize };
-            yAxis = 0;
-            direcProxy = 2;
+            }
+            if (xAxis === -1 && xAxis != 1 && direcProxy != 1)
+            {
+                direction = { x: -gridSize, y: 0 };
+                xAxis = 0;
+                direcProxy = 3;
+            }
+            if (yAxis === -1 && yAxis != 1 && direcProxy!=2)
+            {
+                direction = { x: 0, y: -gridSize };
+                yAxis = 0;
+                direcProxy = 0;
+            }
+            if (yAxis === 1 && yAxis != -1 && direcProxy!=0)
+            {
+                direction = { x: 0, y: gridSize };
+                yAxis = 0;
+                direcProxy = 2;
+            }
         }
         console.log("yAxis "+yAxis);
         console.log("xAxis "+xAxis);
