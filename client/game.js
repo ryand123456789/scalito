@@ -4,7 +4,7 @@ const message = document.getElementById("message")
 const ctx = canvas.getContext("2d");
 
 const gridSize = 20; // Size of the grid
-const canvasSize = 500; // Size of the canvas
+const canvasSize = 400; // Size of the canvas
 const snakeSpeed = 100; // Speed of the snake (in milliseconds)
 var canvasExpand = 400;
 

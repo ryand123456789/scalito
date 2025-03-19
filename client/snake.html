@@ -7,20 +7,27 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <div id="gameArea">
+        <canvas id="gameCanvas"></canvas>
+        <div id="gameDisplay">
+            <div id="message">Welcome to Scalitosnake - Use the joystick to start</div>
+                <button id="restart" onclick= "location.reload();" >Restart</button>
+        </div>
+    </div>
+    <script src="game.js"></script>
     <div class="sidebar" id="sidebar">
         <span class="toggle-btn" onclick="toggleSidebar()">☰ Menu</span>
         <a href="snake.html">Snakelito</a>
-        <a href="scalitofart.html">About</a>
-        <a href="pacman.html">Services</a>
-        <a href="index.html">Contact</a>
+        <a href="scalitofart.html">Addi Fart</a>
+        <a href="pacman.html">Pacman</a>
+        <a href="index.html">Fourth</a>
     </div>
-    <div id="gameDisplay">
-        <div id="message">Welcome to Scalitosnake - Use the joystick to start</div>
-            <button id="restart" onclick= "location.reload();" >Restart</button>
-    </div>
-    <div id="gameArea">
-        <canvas id="gameCanvas"></canvas>
-    </div>
-    <script src="game.js"></script>
+    <script>
+        // Toggle sidebar for mobile
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('open');
+        }
+    </script>
 </body>
 </html>
