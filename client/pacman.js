@@ -10,7 +10,6 @@ const FOOD_SIZE = 5;
 const GRID_SIZE_X = Math.floor(WIDTH / FOOD_SIZE);
 const GRID_SIZE_Y = Math.floor(HEIGHT / FOOD_SIZE);
 
-
 // Game State
 let pacmanX = 250, pacmanY = 250;
 let pacmanDirection = 'right';
@@ -27,18 +26,22 @@ const GHOST_RADIUS = 12; // Size of the ghost
 let mouthAngle = 0;
 let mouthOpening = true;
 
+// Timer Variables
+let startTime = Date.now();  // Start time when the game begins
+let elapsedTime = 0;         // Time elapsed during the game
+
 // Initialize Food Grid
 function initializeFoodGrid() {
     foodGrid = [];
-    for (let row = 2; row < GRID_SIZE_Y; row++) {
+    for (let row = 2; row < GRID_SIZE_Y - 3; row++) {
         for (let col = 2; col < GRID_SIZE_X; col++) {
             foodGrid.push({ x: col * FOOD_SIZE, y: row * FOOD_SIZE, eaten: false });
-            col +=  Math.random() * (4) + 3;
+            col += Math.random() * (4) + 3;
+            totalFood += 1;
         }
         row += Math.random() * (4) + 3;
-        totalFood +=1;
+        totalFood += 1;
     }
-    
 }
 
 // Ghost Constructor
@@ -55,14 +58,12 @@ function createGhost(x, y, color) {
 
             // Move horizontally towards Pac-Man
             if (Math.abs(dx) > Math.abs(dy)) {
-                // Move towards Pac-Man's x-axis
                 if (dx > 0) {
                     this.x += Math.random(); // Move right
                 } else {
                     this.x -= Math.random(); // Move left
                 }
             } else {
-                // Move towards Pac-Man's y-axis
                 if (dy > 0) {
                     this.y += Math.random(); // Move down
                 } else {
@@ -158,7 +159,6 @@ function checkFoodCollision() {
             totalFood -= 1;
         }
     });
-    console.log(totalFood);
 }
 
 // Check if Pac-Man collides with any ghost
@@ -166,7 +166,7 @@ function checkGhostCollision() {
     ghosts.forEach(ghost => {
         const distX = pacmanX - ghost.x;
         const distY = pacmanY - ghost.y;
-        const distance = 15 + Math.sqrt(distX * distX + distY * distY);
+        const distance = Math.sqrt(distX * distX + distY * distY);
 
         if (distance < PACMAN_RADIUS + GHOST_RADIUS) {
             isGameOver = true;
@@ -189,6 +189,18 @@ function movePacman() {
     if (pacmanY > HEIGHT - PACMAN_RADIUS) pacmanY = HEIGHT - PACMAN_RADIUS;
 }
 
+// Update Timer
+function updateTimer() {
+    elapsedTime = Math.floor((Date.now() - startTime) / 1000);  // Elapsed time in seconds
+}
+
+// Draw the Timer
+function drawTimer() {
+    ctx.font = "20px Arial";
+    ctx.fillStyle = "white";
+    ctx.fillText("Time: " + elapsedTime + "s", WIDTH - 100, 30); // Display elapsed time
+}
+
 // Draw the Game
 function draw() {
     ctx.clearRect(0, 0, WIDTH, HEIGHT);
@@ -203,7 +215,7 @@ function draw() {
         ctx.fillText("Game Over", WIDTH / 2 - 80, HEIGHT / 2);
         return;
     }
-    console.log(totalFood);
+
     drawPacman();
     drawFoodGrid();
     checkFoodCollision();
@@ -218,7 +230,11 @@ function draw() {
     ctx.font = "20px Arial";
     ctx.fillStyle = "white";
     ctx.fillText("Score: " + score, 10, 30);
+
+    drawTimer(); // Display the timer
+
     movePacman();
+    updateTimer();  // Update the timer every frame
     requestAnimationFrame(draw);
 }
 
