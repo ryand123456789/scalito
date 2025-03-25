@@ -10,35 +10,41 @@ const FOOD_SIZE = 5;
 const GRID_SIZE_X = Math.floor(WIDTH / FOOD_SIZE);
 const GRID_SIZE_Y = Math.floor(HEIGHT / FOOD_SIZE);
 
-
 // Game State
 let pacmanX = 250, pacmanY = 250;
 let pacmanDirection = 'right';
 let isGameOver = false;
 let score = 0;
 let foodGrid = [];
-let ghosts = []; // Array to store ghost objects
+let ghosts = [];
 let totalFood = 0;
+let totalFoodEaten = 0;
+let finalScore = 0; 
+let isVisible = true; 
 
 // Ghost Constants
-const GHOST_RADIUS = 12; // Size of the ghost
+const GHOST_RADIUS = 12;
 
 // Mouth Animation Variables
 let mouthAngle = 0;
 let mouthOpening = true;
 
+// Timer Variables
+let startTime = Date.now();  
+let elapsedTime = 0;
+
 // Initialize Food Grid
 function initializeFoodGrid() {
     foodGrid = [];
-    for (let row = 2; row < GRID_SIZE_Y; row++) {
+    for (let row = 2; row < GRID_SIZE_Y - 3; row++) {
         for (let col = 2; col < GRID_SIZE_X; col++) {
             foodGrid.push({ x: col * FOOD_SIZE, y: row * FOOD_SIZE, eaten: false });
-            col +=  Math.random() * (4) + 3;
+            col += Math.random() * (4) + 3;
+            totalFood += 1;
         }
         row += Math.random() * (4) + 3;
-        totalFood +=1;
+        totalFood += 1;
     }
-    
 }
 
 // Ghost Constructor
@@ -46,31 +52,21 @@ function createGhost(x, y, color) {
     return {
         x: x,
         y: y,
-        direction: 'right', // Initial direction
+        direction: 'right',
         color: color,
         move() {
-            // Chase Pac-Man: move in the shortest direction
-            let dx = pacmanX - this.x; // Difference in x (horizontal)
-            let dy = pacmanY - this.y; // Difference in y (vertical)
+            let dx = pacmanX - this.x;
+            let dy = pacmanY - this.y;
 
-            // Move horizontally towards Pac-Man
             if (Math.abs(dx) > Math.abs(dy)) {
-                // Move towards Pac-Man's x-axis
-                if (dx > 0) {
-                    this.x += Math.random(); // Move right
-                } else {
-                    this.x -= Math.random(); // Move left
-                }
+                if (dx > 0) this.x += Math.random();
+                else this.x -= Math.random();
             } else {
-                // Move towards Pac-Man's y-axis
-                if (dy > 0) {
-                    this.y += Math.random(); // Move down
-                } else {
-                    this.y -= Math.random(); // Move up
-                }
+                if (dy > 0) this.y += Math.random();
+                else this.y -= Math.random();
             }
 
-            // Boundary collision check for ghost
+            // Boundary collision check
             if (this.x < GHOST_RADIUS) this.x = GHOST_RADIUS;
             if (this.x > WIDTH - GHOST_RADIUS) this.x = WIDTH - GHOST_RADIUS;
             if (this.y < GHOST_RADIUS) this.y = GHOST_RADIUS;
@@ -154,11 +150,11 @@ function checkFoodCollision() {
 
         if (distance < PACMAN_RADIUS + FOOD_SIZE / 2 && !food.eaten) {
             food.eaten = true;
+            totalFoodEaten += 1;
             score += 10;
             totalFood -= 1;
         }
     });
-    console.log(totalFood);
 }
 
 // Check if Pac-Man collides with any ghost
@@ -166,7 +162,7 @@ function checkGhostCollision() {
     ghosts.forEach(ghost => {
         const distX = pacmanX - ghost.x;
         const distY = pacmanY - ghost.y;
-        const distance = 15 + Math.sqrt(distX * distX + distY * distY);
+        const distance = Math.sqrt(distX * distX + distY * distY);
 
         if (distance < PACMAN_RADIUS + GHOST_RADIUS) {
             isGameOver = true;
@@ -180,6 +176,7 @@ function checkGhostCollision() {
 function movePacman() {
     if (pacmanDirection === 'up') pacmanY -= SPEED;
     if (pacmanDirection === 'down') pacmanY += SPEED;
+
     if (pacmanDirection === 'left') pacmanX -= SPEED;
     if (pacmanDirection === 'right') pacmanX += SPEED;
 
@@ -188,6 +185,68 @@ function movePacman() {
     if (pacmanY < PACMAN_RADIUS) pacmanY = PACMAN_RADIUS;
     if (pacmanY > HEIGHT - PACMAN_RADIUS) pacmanY = HEIGHT - PACMAN_RADIUS;
 }
+
+// Update Timer
+function updateTimer() {
+    elapsedTime = Math.floor((Date.now() - startTime) / 1000);  // Elapsed time in seconds
+}
+
+// Draw the Timer
+function drawTimer() {
+    ctx.font = "20px Arial";
+    ctx.fillStyle = "white";
+    ctx.fillText("Time: " + elapsedTime + "s", WIDTH - 100, 30); // Display elapsed time
+}
+
+let xAxis= 0; 
+let yAxis= 0;
+
+// Handle Gamepad State (Joystick Input)
+function getGamepadState() {
+    const gamepads = navigator.getGamepads();
+    const gamepad = gamepads[0];
+
+    if (gamepad) {
+        if(!(gamepad.axes[0] < 0.2 && gamepad.axes[0] > -0.2)){
+            xAxis = gamepad.axes[0];
+            console.log("set xAxis");
+            yAxis = 0;
+        }
+        if(!(gamepad.axes[1] < 0.2 && gamepad.axes[1] > -0.2)){
+            yAxis = gamepad.axes[1];
+            console.log("set yAxis");
+            xAxis = 0;
+        }
+         if (xAxis === 1 )
+            {
+                pacmanDirection = "right";
+                yAxis = 0;
+                movePacman();
+            }
+        if (xAxis === -1)
+            {
+                pacmanDirection = "left";
+                movePacman();
+            }
+        if (yAxis === -1)
+            {
+                pacmanDirection = "up";
+                movePacman();
+            }
+        if (yAxis === 1 )
+            {
+                pacmanDirection = "down";
+                movePacman();
+            }
+            console.log("yAxis "+yAxis);
+            console.log("xAxis "+xAxis);
+        }
+        // Boundaries
+        if (pacmanX < PACMAN_RADIUS) pacmanX = PACMAN_RADIUS;
+        if (pacmanX > WIDTH - PACMAN_RADIUS) pacmanX = WIDTH - PACMAN_RADIUS;
+        if (pacmanY < PACMAN_RADIUS) pacmanY = PACMAN_RADIUS;
+        if (pacmanY > HEIGHT - PACMAN_RADIUS) pacmanY = HEIGHT - PACMAN_RADIUS;
+    }
 
 // Draw the Game
 function draw() {
@@ -198,18 +257,33 @@ function draw() {
     }
 
     if (isGameOver) {
-        ctx.font = "30px monospace";
+        finalScore = totalFoodEaten / elapsedTime ;
+        finalScore = Math.round(finalScore);
+        ctx.font = "25px monospace";
         ctx.fillStyle = "white";
-        ctx.fillText("Game Over", WIDTH / 2 - 80, HEIGHT / 2);
+        if(totalFood != 0){
+            ctx.fillText("You died. Your score is ", WIDTH / 2 - 175, HEIGHT / 2);
+            ctx.fillText(finalScore + " pieces of food per second", WIDTH / 2 - 200, HEIGHT / 2+50); 
+            ctx.font = "15px monospace";
+            ctx.fillText("Time elapsed: " + elapsedTime + " seconds" , WIDTH / 2 - 225, HEIGHT / 2+200);  
+            ctx.fillText("Food eaten:  " + totalFoodEaten + " pieces" , WIDTH / 2 -225 , HEIGHT / 2+215);
+        }
+        if(totalFood === 0){
+        ctx.fillText("You win! Your score is ", WIDTH / 2 - 175, HEIGHT / 2);
+        ctx.fillText(finalScore + " pieces of food per second", WIDTH / 2 - 200, HEIGHT / 2+50);
+        ctx.font = "15px monospace";
+        ctx.fillText("Time elapsed: " + elapsedTime + " seconds" , WIDTH / 2 - 225, HEIGHT / 2+200);
+        ctx.fillText("Food eaten:  " + totalFoodEaten + " pieces" , WIDTH / 2 -225, HEIGHT / 2+215);
+        }
         return;
     }
-    console.log(totalFood);
+
     drawPacman();
     drawFoodGrid();
     checkFoodCollision();
 
     ghosts.forEach(ghost => {
-        ghost.move(); // Move ghosts to chase Pac-Man
+        ghost.move(); 
         ghost.draw();
     });
 
@@ -218,17 +292,12 @@ function draw() {
     ctx.font = "20px Arial";
     ctx.fillStyle = "white";
     ctx.fillText("Score: " + score, 10, 30);
-    movePacman();
+
+    drawTimer(); 
+    getGamepadState();  // Check gamepad state
+    updateTimer(); 
     requestAnimationFrame(draw);
 }
-
-// Handle Keyboard Input
-document.addEventListener("keydown", (event) => {
-    if (event.key === "ArrowUp") pacmanDirection = 'up';
-    if (event.key === "ArrowDown") pacmanDirection = 'down';
-    if (event.key === "ArrowLeft") pacmanDirection = 'left';
-    if (event.key === "ArrowRight") pacmanDirection = 'right';
-});
 
 // Initialize game elements
 initializeFoodGrid();
