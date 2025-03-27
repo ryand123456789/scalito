@@ -6,8 +6,11 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 let gravity = 0.5;
-let jumpPower = 20;
+let jumpPower = 30;
 let platformShift = 0;
+let cameraOffsetX = 0;
+let cameraOffsetY = 0;
+let jumpBuffer = false; // Buffer jump input
 
 // Player object
 let player = {
@@ -23,17 +26,17 @@ let player = {
 
 // Generate platforms upwards
 let platforms = [];
-for (let i = 0; i < 200; i++) {
+for (let i = 0; i < 15000; i++) {
     platforms.push({
-        x: Math.random() * (canvas.width - 200),
-        y: canvas.height - 100 - i * 100,
-        width: 200,
-        height: 20
+        x: 10000-(Math.random() * (canvas.width + 20000)),
+        y: canvas.height - 100 - i * 10,
+        width: 800*Math.random(),
+        height: 700*Math.random()
     });
 }
 
 // Add floor platform
-const floor = { x: 0, y: canvas.height - 50, width: canvas.width, height: 50 };
+const floor = { x: -40000, y: canvas.height - 200, width: canvas.width+80000, height: 3000 };
 platforms.push(floor);
 
 // Controls
@@ -42,13 +45,13 @@ let keys = { right: false, left: false, up: false };
 document.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowRight' || e.key === 'd') keys.right = true;
     if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = true;
-    if (e.key === ' ' && player.grounded) keys.up = true;
+    if (e.key === ' ') jumpBuffer = true; // Store jump input
 });
 
 document.addEventListener('keyup', (e) => {
     if (e.key === 'ArrowRight' || e.key === 'd') keys.right = false;
     if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = false;
-    if (e.key === ' ') keys.up = false;
+    if (e.key === ' ') jumpBuffer = false;
 });
 
 // Collision detection
@@ -98,16 +101,12 @@ function collideWithPlatforms() {
 function update() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    if (keys.right) 
-    {
+    if (keys.right) {
         player.speedX += 0.5;
+    } else if (keys.left) {
+        player.speedX -= 0.5;
     }
-    else if(keys.left) {
-        player.speedX += -0.5;
-    }
-    player.speedX = player.speedX * 0.98
-
-    if (keys.up && player.grounded) player.speedY = -jumpPower;
+    player.speedX *= 0.99; // More gradual deceleration for better control
 
     if (!player.grounded) player.speedY += gravity;
     
@@ -116,12 +115,34 @@ function update() {
     
     collideWithPlatforms();
     
+    // Execute buffered jump when grounded
+    if (jumpBuffer && player.grounded) {
+        player.speedY = -jumpPower;
+        player.grounded = false;
+        jumpBuffer = false;
+    }
+    
     // Keep the player centered while moving platforms instead
     if (player.y < canvas.height / 2) {
         let shift = canvas.height / 2 - player.y;
         platformShift += shift;
+        cameraOffsetY += shift;
         player.y = canvas.height / 2;
         platforms.forEach(p => p.y += shift);
+    } else if (player.y > canvas.height * 0.75) { // Pan downward if player falls
+        let shift = player.y - canvas.height * 0.75;
+        platformShift -= shift;
+        cameraOffsetY -= shift;
+        player.y = canvas.height * 0.75;
+        platforms.forEach(p => p.y -= shift);
+    }
+    
+    // Keep the player centered horizontally while moving platforms instead
+    if (player.x < canvas.width / 2 || player.x > canvas.width / 2) {
+        let shiftX = canvas.width / 2 - player.x;
+        cameraOffsetX += shiftX;
+        player.x = canvas.width / 2;
+        platforms.forEach(p => p.x += shiftX);
     }
     
     // Draw platforms
@@ -136,7 +157,9 @@ function update() {
     // Draw player
     ctx.fillStyle = player.color;
     ctx.fillRect(player.x, player.y, player.width, player.height);
+    ctx.fill
 
     requestAnimationFrame(update);
 }
+
 update();
