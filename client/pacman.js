@@ -2,7 +2,7 @@ const canvas = document.getElementById("pacmanCanvas");
 const ctx = canvas.getContext("2d");
 
 document.addEventListener("DOMContentLoaded", () => {
-
+handleArrowKeys();
 // Game Constants
 const PACMAN_RADIUS = 10;
 const SPEED = 3;
@@ -46,6 +46,7 @@ function initializeFoodGrid() {
         row += 3;
         totalFood += 1;
     }
+    console.log(totalFood);
 }
 
 // Ghost Constructor
@@ -184,7 +185,6 @@ function checkGhostCollision() {
 function movePacman() {
     if (pacmanDirection === 'up') pacmanY -= SPEED;
     if (pacmanDirection === 'down') pacmanY += SPEED;
-
     if (pacmanDirection === 'left') pacmanX -= SPEED;
     if (pacmanDirection === 'right') pacmanX += SPEED;
 
@@ -211,6 +211,33 @@ function drawTimer() {
 
 let xAxis= 0; 
 let yAxis= 0;
+
+function handleArrowKeys() {
+    document.addEventListener("keydown", (e) => {
+        console.log("Key: " + e.key);
+        switch (e.key) {
+            case 'ArrowUp':
+                pacmanDirection = 'up';
+                break;
+            case 'ArrowDown':
+                pacmanDirection = 'down';
+                break;
+            case 'ArrowLeft':
+                pacmanDirection = 'left';
+                break;
+            case 'ArrowRight':
+                pacmanDirection = 'right';
+                break;
+            case 'r':
+                location.reload();
+                break;
+            case 'R':
+                location.reload();
+                break;
+        }
+    });
+}
+
 
 // Handle Gamepad State (Joystick Input)
 function getGamepadState() {
@@ -277,6 +304,7 @@ function draw() {
     }
 
     if (isGameOver) {
+        handleArrowKeys();
         finalScore = totalFoodEaten / elapsedTime ;
         finalScore = Math.round(finalScore);
         ctx.font = "25px monospace";
@@ -301,6 +329,7 @@ function draw() {
         }
     }
     if(!isGameOver){
+        movePacman();
         drawPacman();
         drawFoodGrid();
         checkFoodCollision();
