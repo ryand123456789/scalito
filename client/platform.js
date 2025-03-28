@@ -12,6 +12,9 @@ let cameraOffsetX = 0;
 let cameraOffsetY = 0;
 let jumpBuffer = false; // Buffer jump input
 
+let xAxis = 0;
+let yAxis = 0;
+
 // Player object
 let player = {
     x: canvas.width / 2 - 25,
@@ -45,7 +48,7 @@ let keys = { right: false, left: false, up: false };
 document.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowRight' || e.key === 'd') keys.right = true;
     if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = true;
-    if (e.key === ' ') jumpBuffer = true; // Store jump input
+    if (e.key === ' ' || e.key === 'ArrowUp' || e.key === 'w') jumpBuffer = true; // Store jump input
 });
 
 document.addEventListener('keyup', (e) => {
@@ -96,9 +99,39 @@ function collideWithPlatforms() {
         player.grounded = true;
     }
 }
+/*function gamepadRep(){
+    const gamepads = navigator.getGamepads();
+    const gamepad = gamepads[0];
+    if(gamepad){
+        if(gamepad.buttons[5].pressed){
+            keys.right = true;
+            keys.left = false;
+        }
+        else if(gamepad.buttons[6].pressed)
+        {
+            keys.left = true;
+            keys.right = false;
+        }
+        else{
+            keys.left = false;
+            keys.right = false;            
+        }
 
+        if(gamepad.buttons[4].pressed){
+            keys.up = true;
+        }
+        else{
+            keys.up = false;
+        }
+        if(gamepad.buttons[8].pressed)
+        {
+            location.reload();
+        }
+    }
+}*/
 // Update function
 function update() {
+    //gamepadRep();
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     if (keys.right) {
