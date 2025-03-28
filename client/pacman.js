@@ -1,6 +1,8 @@
 const canvas = document.getElementById("pacmanCanvas");
 const ctx = canvas.getContext("2d");
 
+document.addEventListener("DOMContentLoaded", () => {
+handleArrowKeys();
 // Game Constants
 const PACMAN_RADIUS = 10;
 const SPEED = 3;
@@ -19,8 +21,7 @@ let foodGrid = [];
 let ghosts = [];
 let totalFood = 0;
 let totalFoodEaten = 0;
-let finalScore = 0; 
-let isVisible = true; 
+let finalScore = 0;  
 
 // Ghost Constants
 const GHOST_RADIUS = 12;
@@ -39,31 +40,39 @@ function initializeFoodGrid() {
     for (let row = 2; row < GRID_SIZE_Y - 3; row++) {
         for (let col = 2; col < GRID_SIZE_X; col++) {
             foodGrid.push({ x: col * FOOD_SIZE, y: row * FOOD_SIZE, eaten: false });
-            col += Math.random() * (4) + 3;
+            col += 3;
             totalFood += 1;
         }
-        row += Math.random() * (4) + 3;
+        row += 3;
         totalFood += 1;
     }
+    console.log(totalFood);
 }
 
 // Ghost Constructor
-function createGhost(x, y, color) {
+function createGhost(x, y, color, gspeed) {
     return {
         x: x,
         y: y,
         direction: 'right',
         color: color,
         move() {
+            let decision = Math.random()*100; 
             let dx = pacmanX - this.x;
             let dy = pacmanY - this.y;
-
-            if (Math.abs(dx) > Math.abs(dy)) {
-                if (dx > 0) this.x += Math.random();
-                else this.x -= Math.random();
-            } else {
-                if (dy > 0) this.y += Math.random();
-                else this.y -= Math.random();
+           // two functions let decision = Math.random
+            if((decision % 50)!= 0){
+                if (Math.abs(dx) > Math.abs(dy)) {
+                    if (dx > 0) this.x += Math.random()*gspeed;
+                    else this.x -= Math.random()*gspeed;
+                } else {
+                    if (dy > 0) this.y += Math.random()*gspeed;
+                    else this.y -= Math.random()*gspeed;
+                }  
+            }
+            else{
+                this.x += (Math.random()*6)-3;
+                this.y += (Math.random()*6)-3;
             }
 
             // Boundary collision check
@@ -84,10 +93,10 @@ function createGhost(x, y, color) {
 
 // Initialize some ghosts
 function initializeGhosts() {
-    ghosts.push(createGhost(100, 100, "red"));
-    ghosts.push(createGhost(400, 100, "pink"));
-    ghosts.push(createGhost(100, 400, "blue"));
-    ghosts.push(createGhost(400, 400, "orange"));
+    ghosts.push(createGhost(100, 100, "red", 1.5));
+    ghosts.push(createGhost(400, 100, "pink", 2));
+    ghosts.push(createGhost(100, 400, "blue", 2.5));
+    ghosts.push(createGhost(400, 400, "orange", 3.5));
 }
 
 // Draw Pac-Man with Directional Mouth
@@ -176,7 +185,6 @@ function checkGhostCollision() {
 function movePacman() {
     if (pacmanDirection === 'up') pacmanY -= SPEED;
     if (pacmanDirection === 'down') pacmanY += SPEED;
-
     if (pacmanDirection === 'left') pacmanX -= SPEED;
     if (pacmanDirection === 'right') pacmanX += SPEED;
 
@@ -188,8 +196,11 @@ function movePacman() {
 
 // Update Timer
 function updateTimer() {
-    elapsedTime = Math.floor((Date.now() - startTime) / 1000);  // Elapsed time in seconds
+    if(!isGameOver){  
+        elapsedTime = Math.floor((Date.now() - startTime) / 1000);  // Elapsed time in seconds
+    }
 }
+
 
 // Draw the Timer
 function drawTimer() {
@@ -201,12 +212,45 @@ function drawTimer() {
 let xAxis= 0; 
 let yAxis= 0;
 
+function handleArrowKeys() {
+    document.addEventListener("keydown", (e) => {
+        console.log("Key: " + e.key);
+        switch (e.key) {
+            case 'ArrowUp':
+                pacmanDirection = 'up';
+                break;
+            case 'ArrowDown':
+                pacmanDirection = 'down';
+                break;
+            case 'ArrowLeft':
+                pacmanDirection = 'left';
+                break;
+            case 'ArrowRight':
+                pacmanDirection = 'right';
+                break;
+            case 'r':
+                location.reload();
+                break;
+            case 'R':
+                location.reload();
+                break;
+        }
+    });
+}
+
+
 // Handle Gamepad State (Joystick Input)
 function getGamepadState() {
     const gamepads = navigator.getGamepads();
     const gamepad = gamepads[0];
 
     if (gamepad) {
+        //resert
+        if(gamepad.buttons[8].pressed)
+            {
+                location.reload();
+            }
+        if(!isGameOver){
         if(!(gamepad.axes[0] < 0.2 && gamepad.axes[0] > -0.2)){
             xAxis = gamepad.axes[0];
             console.log("set xAxis");
@@ -240,16 +284,19 @@ function getGamepadState() {
             }
             console.log("yAxis "+yAxis);
             console.log("xAxis "+xAxis);
-        }
+        }}
         // Boundaries
         if (pacmanX < PACMAN_RADIUS) pacmanX = PACMAN_RADIUS;
         if (pacmanX > WIDTH - PACMAN_RADIUS) pacmanX = WIDTH - PACMAN_RADIUS;
         if (pacmanY < PACMAN_RADIUS) pacmanY = PACMAN_RADIUS;
         if (pacmanY > HEIGHT - PACMAN_RADIUS) pacmanY = HEIGHT - PACMAN_RADIUS;
-    }
+  
+    // restarts the game
+}
 
 // Draw the Game
 function draw() {
+
     ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
     if (totalFood === 0) {
@@ -257,35 +304,41 @@ function draw() {
     }
 
     if (isGameOver) {
+        handleArrowKeys();
         finalScore = totalFoodEaten / elapsedTime ;
         finalScore = Math.round(finalScore);
         ctx.font = "25px monospace";
-        ctx.fillStyle = "white";
+        ctx.fillStyle = "black";
+        ctx.fillRect(0,0,WIDTH,HEIGHT); 
         if(totalFood != 0){
+            ctx.fillStyle = "white";
             ctx.fillText("You died. Your score is ", WIDTH / 2 - 175, HEIGHT / 2);
             ctx.fillText(finalScore + " pieces of food per second", WIDTH / 2 - 200, HEIGHT / 2+50); 
             ctx.font = "15px monospace";
-            ctx.fillText("Time elapsed: " + elapsedTime + " seconds" , WIDTH / 2 - 225, HEIGHT / 2+200);  
-            ctx.fillText("Food eaten:  " + totalFoodEaten + " pieces" , WIDTH / 2 -225 , HEIGHT / 2+215);
+            ctx.fillText("Time elapsed: " + elapsedTime + " seconds" , WIDTH / 2 - 225, HEIGHT / 2+215);  
+            ctx.fillText("Food eaten:  " + totalFoodEaten + " pieces" , WIDTH / 2 -225 , HEIGHT / 2+230);
+            ctx.fillText("Press R to play again ", WIDTH / 2 - 80, HEIGHT / 2+75);
         }
         if(totalFood === 0){
         ctx.fillText("You win! Your score is ", WIDTH / 2 - 175, HEIGHT / 2);
         ctx.fillText(finalScore + " pieces of food per second", WIDTH / 2 - 200, HEIGHT / 2+50);
         ctx.font = "15px monospace";
-        ctx.fillText("Time elapsed: " + elapsedTime + " seconds" , WIDTH / 2 - 225, HEIGHT / 2+200);
-        ctx.fillText("Food eaten:  " + totalFoodEaten + " pieces" , WIDTH / 2 -225, HEIGHT / 2+215);
+        ctx.fillText("Time elapsed: " + elapsedTime + " seconds" , WIDTH / 2 - 225, HEIGHT / 2+215);
+        ctx.fillText("Food eaten:  " + totalFoodEaten + " pieces" , WIDTH / 2 -225, HEIGHT / 2+230);
+        ctx.fillText("Press R to play again ", WIDTH / 2 - 80 , HEIGHT / 2+75);
         }
-        return;
     }
-
-    drawPacman();
-    drawFoodGrid();
-    checkFoodCollision();
+    if(!isGameOver){
+        movePacman();
+        drawPacman();
+        drawFoodGrid();
+        checkFoodCollision();
 
     ghosts.forEach(ghost => {
         ghost.move(); 
         ghost.draw();
     });
+    }
 
     checkGhostCollision();
 
@@ -303,3 +356,4 @@ function draw() {
 initializeFoodGrid();
 initializeGhosts();
 draw();
+})
