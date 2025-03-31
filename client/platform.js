@@ -110,7 +110,7 @@ function colorChange()
         canvas.style.background = "rgb(0, 0, 0)";
         platformColor = "rgb(255, 255, 255)";
         console.log("ran");
-        player.color = "rgb(255, 255, 255)";
+        player.color = "rgb(255, 0, 255)";
     }
     else if(baseHeight > 4300)
         {
