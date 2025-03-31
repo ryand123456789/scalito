@@ -13,6 +13,7 @@ let cameraOffsetY = 0;
 let jumpBuffer = false; // Buffer jump input
 let baseHeight = 0;
 let platformColor = 'green'
+let textColor = 'black';
 
 // canvas.backgroundColor;
 
@@ -31,7 +32,7 @@ let player = {
 
 // Generate platforms upwards
 let platforms = [];
-for (let i = 0; i < 15000; i++) {
+for (let i = 0; i < 50000; i++) {
     platforms.push({
         x: 10000-(Math.random() * (canvas.width + 20000)),
         y: canvas.height - 100 - i * 10,
@@ -111,6 +112,7 @@ function colorChange()
         platformColor = "rgb(255, 255, 255)";
         console.log("ran");
         player.color = "rgb(255, 0, 255)";
+        textColor = "rgb(0, 255, 55)";
     }
     else if(baseHeight > 4300)
         {
@@ -251,6 +253,7 @@ function colorChange()
         {
             canvas.style.background = "rgb(255, 38, 0)";
             platformColor = "rgb(0, 0, 0)";
+            textColor = 'black';
         }
     else if(baseHeight > 1400)
         {
@@ -287,6 +290,7 @@ function colorChange()
         {
             canvas.style.background = "rgb(0, 26, 139)";
             platformColor = "rgb(9, 46, 0)";
+            textColor = 'white';
         }
     else if(baseHeight > 400)
     {
@@ -370,7 +374,7 @@ function update() {
     // Draw player
     ctx.fillStyle = player.color;
     ctx.fillRect(player.x, player.y, player.width, player.height);
-    ctx.fillStyle = 'black';
+    ctx.fillStyle = textColor;
     var fontSize = canvas.width*0.05; 
     ctx.font = `${fontSize}px Arial`;
 
